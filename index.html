@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Paleta de Cores</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .color-box {
+            display: inline-block;
+            width: 100px;
+            height: 100px;
+            margin: 10px;
+            border: 1px solid #000;
+        }
+    </style>
+</head>
+<body>
+    <h1>Gerador de Paleta de Cores</h1>
+    <button onclick="generatePalette()">Gerar Paleta</button>
+    <div id="palette"></div>
+
+    <script>
+        function generateRandomColor() {
+            return [Math.floor(Math.random() * 256), Math.floor(Math.random() * 256), Math.floor(Math.random() * 256)];
+        }
+
+        function generatePalette() {
+            const numberOfColors = 5;
+            const maxIterations = 100;
+            const data = Array.from({ length: 100 }, () => generateRandomColor());
+            const centers = kMeans(data, numberOfColors, maxIterations);
+            displayPalette(centers);
+        }
+
+        function displayPalette(centers) {
+            const paletteContainer = document.getElementById('palette');
+            paletteContainer.innerHTML = '';
+
+            for (const center of centers) {
+                const colorBox = document.createElement('div');
+                colorBox.classList.add('color-box');
+                colorBox.style.backgroundColor = `rgb(${Math.round(center[0])}, ${Math.round(center[1])}, ${Math.round(center[2])})`;
+                paletteContainer.appendChild(colorBox);
+            }
+        }
+
+        function kMeans(data, k, maxIterations) {
+            let centers = [];
+            for (let i = 0; i < k; i++) {
+                centers.push(data[Math.floor(Math.random() * data.length)]);
+            }
+
+            for (let iteration = 0; iteration < maxIterations; iteration++) {
+                const clusters = Array.from({ length: k }, () => []);
+
+                for (const point of data) {
+                    const similarities = centers.map(center => colorSimilarity(point, center));
+                    const closestCenterIndex = similarities.indexOf(Math.max(...similarities));
+                    clusters[closestCenterIndex].push(point);
+                }
+
+                for (let i = 0; i < k; i++) {
+                    if (clusters[i].length > 0) {
+                        centers[i] = calculateMean(clusters[i]);
+                    }
+                }
+            }
+
+            return centers;
+        }
+
+        function colorSimilarity(color1, color2) {
+            const maxDistance = Math.sqrt(3 * (255 ** 2));
+            const distance = Math.sqrt(color1.reduce((sum, val, i) => sum + (val - color2[i]) ** 2, 0));
+            return 1 - distance / maxDistance;
+        }
+
+        function calculateMean(points) {
+            const numDimensions = points[0].length;
+            const mean = Array.from({ length: numDimensions }, () => 0);
+
+            for (const point of points) {
+                point.forEach((coord, i) => {
+                    mean[i] += coord;
+                });
+            }
+
+            mean.forEach((coord, i) => {
+                mean[i] = coord / points.length;
+            });
+
+            return mean;
+        }
+    </script>
+</body>
+</html>
