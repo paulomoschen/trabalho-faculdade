@@ -1,0 +1,4 @@
+Para refatorar o código e aplicar alguns padrões de projeto, organizei o código em classes e métodos.
+Abaixo, usei o padrão de projeto Singleton para a leitura do dataset e o padrão de projeto
+Strategy para permitir a troca do algoritmo de regressão linear. 
+Além disso, as visualizações foram mantidas usando o Plotly Express para manter a funcionalidade original.
